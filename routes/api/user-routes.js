@@ -55,12 +55,14 @@ router.delete("/:id", async (req, res) => {
 
 router.post("/:id/friends/:friendId", async (req, res) => {
   try {
-    const user = await User.findById(req.params.id);
+    const user = await User.findOneAndUpdate(
+      { _id: req.params.userId },
+      { $addToSet: { friends: req.params.friendId } },
+      { new: true }
+    );
     if (!User) {
       return res.status(404).json({ message: "No user with this ID!" });
     }
-    user.friends.push(req.params.friendId);
-    await user.save();
     res.json(user);
   } catch (err) {
     console.log(err);
@@ -70,14 +72,14 @@ router.post("/:id/friends/:friendId", async (req, res) => {
 
 router.delete("/:id/friends/:friendId", async (req, res) => {
   try {
-    const user = await User.findById(req.params.id);
+    const user = await User.findOneAndUpdate(
+      { _id: req.params.userId },
+      { $pull: { friends: req.params.friendId } },
+      { new: true }
+    );
     if (!User) {
       return res.status(404).json({ message: "No user with this ID!" });
     }
-    user.friends = user.friends.filter(
-      (friendId) => friendId.toString() !== req.params.friendId
-    );
-    await user.save();
     res.json(user);
   } catch (err) {
     console.log(err);

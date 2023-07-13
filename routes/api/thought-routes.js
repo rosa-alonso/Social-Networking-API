@@ -55,9 +55,11 @@ router.delete("/:id", async (req, res) => {
 
 router.post("/:id/reactions", async (req, res) => {
   try {
-    const thought = await Thought.findById(req.params.id);
-    thought.reactions.push(req.body);
-    await thought.save();
+    const thought = await Thought.findOneAndUpdate(
+      { _id: req.params.id },
+      { $addToSet: { reactions: req.body } },
+      { runValidators: true, new: true }
+    );
     res.json(thought);
   } catch (err) {
     console.log(err);
@@ -67,11 +69,11 @@ router.post("/:id/reactions", async (req, res) => {
 
 router.delete("/:id/reactions/:reactionId", async (req, res) => {
   try {
-    const thought = await Thought.findById(req.params.id);
-    thought.reactions = thought.reactions.filter(
-      (reaction) => reaction.reactionId.toString() !== req.params.reactionId
+    const thought = await Thought.findOneAndUpdate(
+      { _id: req.params.thoughtId },
+      { $pull: { reactions: { reactionId: req.params.reactionId } } },
+      { runValidators: true, new: true }
     );
-    await thought.save();
     res.json(thought);
   } catch (err) {
     console.log(err);
